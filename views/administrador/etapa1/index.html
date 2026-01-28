@@ -26,14 +26,19 @@
                     <h1 class="font-black text-xl tracking-tight leading-none uppercase">OKYRY ADMIN</h1>
                 </div>
             </div>
-            <nav class="flex bg-slate-950 p-1 rounded-2xl border border-slate-800">
-                <button onclick="showTab(event, 'estado')" class="tab-btn bg-emerald-500 text-slate-950 flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold">
-                    <span class="material-symbols-outlined text-lg">list_alt</span> LISTA
+            <div class="flex items-center gap-4">
+                <nav class="flex bg-slate-950 p-1 rounded-2xl border border-slate-800">
+                    <button onclick="showTab(event, 'estado')" class="tab-btn bg-emerald-500 text-slate-950 flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold">
+                        <span class="material-symbols-outlined text-lg">list_alt</span> LISTA
+                    </button>
+                    <button onclick="showTab(event, 'mapa')" class="tab-btn text-slate-400 hover:text-white flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold">
+                        <span class="material-symbols-outlined text-lg">map</span> MAPA
+                    </button>
+                </nav>
+                <button onclick="localStorage.removeItem('okyry_admin'); location.href='/administrador/?autofill=true'" class="text-slate-400 hover:text-white transition-colors p-2 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700">
+                    <span class="material-symbols-outlined">logout</span>
                 </button>
-                <button onclick="showTab(event, 'mapa')" class="tab-btn text-slate-400 hover:text-white flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold">
-                    <span class="material-symbols-outlined text-lg">map</span> MAPA
-                </button>
-            </nav>
+            </div>
         </div>
     </header>
     <main class="flex-1 max-w-7xl w-full mx-auto p-6">
@@ -83,7 +88,7 @@
         function initAdminMap() {
             if(map) { map.invalidateSize(); return; }
             map = L.map('adminMap', { zoomControl: false }).setView([3.75, 8.78], 14);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
             updateAllMarkers();
         }
         function updateAllMarkers() { 

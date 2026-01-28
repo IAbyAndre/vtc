@@ -29,7 +29,9 @@
                     <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
                 </div>
             </div>
-            <button class="text-slate-400"><span class="material-symbols-outlined">menu</span></button>
+            <button onclick="localStorage.removeItem('okyry_user'); location.href='/cliente/?autofill=true'" class="text-slate-400">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
         </header>
 
         <!-- Stepper (5 Pasos) -->

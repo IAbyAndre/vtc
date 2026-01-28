@@ -46,8 +46,9 @@
                     <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
                 </div>
             </div>
-            <button onclick="localStorage.removeItem('okyry_user'); location.href='/'" class="text-slate-400">
+            <button onclick="localStorage.removeItem('okyry_user'); location.href='/cliente/?autofill=true'" class="text-slate-400">
                 <span class="material-symbols-outlined">logout</span>
+            </button>
             </button>
         </header>
 
@@ -127,7 +128,7 @@
             if (map) return;
             
             map = L.map('map', { zoomControl: false }).setView(posA || [-25.2822, -57.6351], 15);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { 
                 attribution: '© OSM' 
             }).addTo(map);
             

@@ -32,6 +32,9 @@
                     </div>
                     <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
                 </div>
+                <button onclick="localStorage.removeItem('okyry_user'); location.href='/cliente/?autofill=true'" class="text-slate-400">
+                    <span class="material-symbols-outlined">logout</span>
+                </button>
             </div>
 
             <!-- Stepper (5 Pasos) -->
@@ -149,7 +152,5 @@
 
         startMatching();
     </script>
-</body>
-</html>
 </body>
 </html>

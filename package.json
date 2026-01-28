@@ -1,10 +1,13 @@
 {
-  "name": "min-express-api",
+  "name": "okyry-demo",
   "version": "1.0.0",
-  "description": "API REST mínima optimizada para 2G",
+  "description": "Demo App Okyry",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "compression": "^1.8.1",

@@ -161,6 +161,13 @@ app.post('/client-pos', (req, res) => {
   res.json({ ok: 1 });
 });
 
+app.get('/administrador', (req, res) => res.sendFile(path.join(__dirname, 'views/administrador/index.html')));
+
+app.get('/usuarios.json', (req, res) => res.sendFile(path.join(__dirname, 'usuarios.json')));
+
+app.use('/conductor', express.static(path.join(__dirname, 'views/conductor')));
+app.get('/conductor', (req, res) => res.sendFile(path.join(__dirname, 'views/conductor/index.html')));
+
 app.use(express.static('views'));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views/index.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'views/admin.html')));

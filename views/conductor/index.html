@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Conductor - Okyry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-white mb-2 uppercase tracking-wide">Portal Conductor</h1>
+            <p class="text-slate-400 text-sm">Introduce tu ID de unidad</p>
+        </div>
+        
+        <form onsubmit="handleLogin(event)" class="space-y-6" autocomplete="on">
+            <div>
+                <label class="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2" for="driverId">ID Conductor</label>
+                <select id="driverId" name="username" required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-slate-700 appearance-none">
+                    <option value="" disabled selected>Selecciona tu ID</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2" for="password">PIN / Contraseña</label>
+                <select id="password" name="password" required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder-slate-700 appearance-none">
+                    <option value="" disabled selected>Selecciona contraseña</option>
+                    <option value="PWD123">PWD123</option>
+                </select>
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg shadow-blue-600/20">
+                Iniciar Turno
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('autofill') === 'true') {
+                document.getElementById('driverId').value = '1';
+                document.getElementById('password').value = 'PWD123';
+            }
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('driverId').value;
+            const password = document.getElementById('password').value;
+
+            if (password !== 'PWD123') {
+                alert('Contraseña incorrecta');
+                return;
+            }
+
+            // Set session and redirect
+            localStorage.setItem('okyry_driver', JSON.stringify({ id: id, loggedIn: true }));
+            window.location.href = `/conductor/etapa1/?id=${id}`;
+        }
+    </script>
+</body>
+</html>

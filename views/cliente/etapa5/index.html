@@ -44,8 +44,13 @@
                         <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse">CONDUCTOR EN CAMINO</p>
                     </div>
                 </div>
-                <div class="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700">
-                    <span id="etaText" class="text-[10px] font-bold text-white uppercase tracking-tighter">Calculando...</span>
+                <div class="flex items-center gap-2">
+                    <div class="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700">
+                        <span id="etaText" class="text-[10px] font-bold text-white uppercase tracking-tighter">Calculando...</span>
+                    </div>
+                    <button onclick="localStorage.removeItem('okyry_user'); location.href='/cliente/?autofill=true'" class="text-slate-400 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-full border border-slate-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm">logout</span>
+                    </button>
                 </div>
             </div>
 
@@ -133,7 +138,7 @@
 
         function initMap() {
             map = L.map('map', { zoomControl: false, attributionControl: false }).setView([3.75, 8.78], 15);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
 
             // Marcador del usuario (Peatón - igual que en Admin)
             if (cart.origin) {

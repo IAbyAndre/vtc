@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Cliente - Okyry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0d1d1a; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-white mb-2 uppercase tracking-wide">Portal Cliente</h1>
+            <p class="text-slate-400 text-sm">Accede para solicitar tus envíos</p>
+        </div>
+        
+        <form onsubmit="handleLogin(event)" class="space-y-6" autocomplete="on">
+            <div>
+                <label class="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2" for="userInput">ID Cliente</label>
+                <select id="userInput" name="username" required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors placeholder-slate-700">
+                    <option value="" disabled selected>Selecciona tu ID</option>
+                    <option value="1">ID 1</option>
+                    <option value="2">ID 2</option>
+                    <option value="3">ID 3</option>
+                    <option value="4">ID 4</option>
+                    <option value="5">ID 5</option>
+                    <option value="6">ID 6</option>
+                    <option value="7">ID 7</option>
+                    <option value="8">ID 8</option>
+                    <option value="9">ID 9</option>
+                    <option value="10">ID 10</option>
+                    <option value="11">ID 11</option>
+                    <option value="12">ID 12</option>
+                    <option value="13">ID 13</option>
+                    <option value="14">ID 14</option>
+                    <option value="15">ID 15</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-slate-400 text-xs font-bold uppercase tracking-wider mb-2" for="password">PIN / Contraseña</label>
+                <select id="passInput" name="password" required
+                    class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors appearance-none">
+                    <option value="PWD123">PWD123</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submitBtn"
+                class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg shadow-emerald-500/20">
+                Iniciar Sesión
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Check session
+        if (localStorage.getItem('okyry_active_trip')) {
+            window.location.href = '/cliente/etapa4';
+        } else if (localStorage.getItem('okyry_user')) {
+             window.location.href = '/cliente/etapa1';
+        }
+
+        let clientesDemo = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load demo data
+            fetch('/usuarios.json')
+                .then(res => res.json())
+                .then(data => { 
+                    clientesDemo = data.clientes; 
+                    
+                    // Autofill logic check
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('autofill') === 'true') {
+                         document.getElementById('userInput').value = '1';
+                         document.getElementById('passInput').value = 'PWD123';
+                    }
+                })
+                .catch(err => console.error("Error cargando demos", err));
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const userInput = document.getElementById('userInput');
+            const passInput = document.getElementById('passInput');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            const user = userInput.value.trim();
+            const pass = passInput.value.trim();
+
+            if (user.length < 1 || pass.length < 3) {
+                alert("Por favor, rellena todos los campos");
+                return;
+            }
+
+            submitBtn.innerText = "ACCEDIENDO...";
+            submitBtn.disabled = true;
+
+            // Simulate server validation delay
+            setTimeout(() => {
+                // Validate against JSON (ID) or Master Password
+                const tempUser = clientesDemo.find(c => String(c.id) === user);
+                const demoMatch = tempUser && (tempUser.password === pass || pass === "PWD123") ? tempUser : null;
+                
+                let finalName = "";
+                let finalAvatar = "";
+
+                if (demoMatch) {
+                    finalName = `${demoMatch.nombre} ${demoMatch.apellido.charAt(0).toUpperCase()}.`;
+                    finalAvatar = demoMatch.avatar;
+                    
+                    const userData = {
+                        nombre: finalName,
+                        email: demoMatch.email,
+                        avatar: finalAvatar
+                    };
+
+                    localStorage.setItem('okyry_user', JSON.stringify(userData));
+                    window.location.href = "/cliente/etapa1";
+                } else {
+                    alert("Usuario no encontrado o contraseña incorrecta");
+                    submitBtn.innerText = "INICIAR SESIÓN";
+                    submitBtn.disabled = false;
+                }
+            }, 800);
+        }
+    </script>
+</body>
+</html>

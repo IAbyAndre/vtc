@@ -1,0 +1,458 @@
+{
+    "administradores": [
+        {
+            "id": 1,
+            "nombre": "Juan",
+            "apellido": "Pérez",
+            "usuario": "admin1",
+            "password": "PWD123",
+            "email": "juan.pérez@okyry.gq"
+        },
+        {
+            "id": 2,
+            "nombre": "María",
+            "apellido": "González",
+            "usuario": "admin2",
+            "password": "PWD123",
+            "email": "maría.gonzález@okyry.gq"
+        },
+        {
+            "id": 3,
+            "nombre": "Carlos",
+            "apellido": "Rodríguez",
+            "usuario": "admin3",
+            "password": "PWD123",
+            "email": "carlos.rodríguez@okyry.gq"
+        },
+        {
+            "id": 4,
+            "nombre": "Ana",
+            "apellido": "Fernández",
+            "usuario": "admin4",
+            "password": "PWD123",
+            "email": "ana.fernández@okyry.gq"
+        },
+        {
+            "id": 5,
+            "nombre": "Luis",
+            "apellido": "López",
+            "usuario": "admin5",
+            "password": "PWD123",
+            "email": "luis.lópez@okyry.gq"
+        },
+        {
+            "id": 6,
+            "nombre": "Elena",
+            "apellido": "Martínez",
+            "usuario": "admin6",
+            "password": "PWD123",
+            "email": "elena.martínez@okyry.gq"
+        },
+        {
+            "id": 7,
+            "nombre": "Miguel",
+            "apellido": "Sánchez",
+            "usuario": "admin7",
+            "password": "PWD123",
+            "email": "miguel.sánchez@okyry.gq"
+        },
+        {
+            "id": 8,
+            "nombre": "Sofía",
+            "apellido": "Gómez",
+            "usuario": "admin8",
+            "password": "PWD123",
+            "email": "sofía.gómez@okyry.gq"
+        },
+        {
+            "id": 9,
+            "nombre": "Pedro",
+            "apellido": "Díaz",
+            "usuario": "admin9",
+            "password": "PWD123",
+            "email": "pedro.díaz@okyry.gq"
+        },
+        {
+            "id": 10,
+            "nombre": "Laura",
+            "apellido": "Hernández",
+            "usuario": "admin10",
+            "password": "PWD123",
+            "email": "laura.hernández@okyry.gq"
+        },
+        {
+            "id": 11,
+            "nombre": "Diego",
+            "apellido": "Ruiz",
+            "usuario": "admin11",
+            "password": "PWD123",
+            "email": "diego.ruiz@okyry.gq"
+        },
+        {
+            "id": 12,
+            "nombre": "Carmen",
+            "apellido": "Morales",
+            "usuario": "admin12",
+            "password": "PWD123",
+            "email": "carmen.morales@okyry.gq"
+        },
+        {
+            "id": 13,
+            "nombre": "Jorge",
+            "apellido": "Castro",
+            "usuario": "admin13",
+            "password": "PWD123",
+            "email": "jorge.castro@okyry.gq"
+        },
+        {
+            "id": 14,
+            "nombre": "Silvia",
+            "apellido": "Ortega",
+            "usuario": "admin14",
+            "password": "PWD123",
+            "email": "silvia.ortega@okyry.gq"
+        },
+        {
+            "id": 15,
+            "nombre": "Andrés",
+            "apellido": "Romero",
+            "usuario": "admin15",
+            "password": "PWD123",
+            "email": "andrés.romero@okyry.gq"
+        }
+    ],
+    "conductores": [
+        {
+            "id": 1,
+            "nombre": "Roberto",
+            "apellido": "Torres",
+            "usuario": "conductor1",
+            "password": "PWD123",
+            "email": "roberto.torres@okyry.gq",
+            "vehiculo": {
+                "marca": "Toyota",
+                "modelo": "Corolla",
+                "placa": "ABC-123"
+            }
+        },
+        {
+            "id": 2,
+            "nombre": "Patricia",
+            "apellido": "Vargas",
+            "usuario": "conductor2",
+            "password": "PWD123",
+            "email": "patricia.vargas@okyry.gq",
+            "vehiculo": {
+                "marca": "Nissan",
+                "modelo": "Versa",
+                "placa": "XYZ-789"
+            }
+        },
+        {
+            "id": 3,
+            "nombre": "Gabriel",
+            "apellido": "Mendoza",
+            "usuario": "conductor3",
+            "password": "PWD123",
+            "email": "gabriel.mendoza@okyry.gq",
+            "vehiculo": {
+                "marca": "Chevrolet",
+                "modelo": "Spark",
+                "placa": "QWE-456"
+            }
+        },
+        {
+            "id": 4,
+            "nombre": "Isabel",
+            "apellido": "Ramos",
+            "usuario": "conductor4",
+            "password": "PWD123",
+            "email": "isabel.ramos@okyry.gq",
+            "vehiculo": {
+                "marca": "Kia",
+                "modelo": "Rio",
+                "placa": "RTY-123"
+            }
+        },
+        {
+            "id": 5,
+            "nombre": "Fernando",
+            "apellido": "Castillo",
+            "usuario": "conductor5",
+            "password": "PWD123",
+            "email": "fernando.castillo@okyry.gq",
+            "vehiculo": {
+                "marca": "Hyundai",
+                "modelo": "Accent",
+                "placa": "UIO-456"
+            }
+        },
+        {
+            "id": 6,
+            "nombre": "Teresa",
+            "apellido": "Jimenez",
+            "usuario": "conductor6",
+            "password": "PWD123",
+            "email": "teresa.jimenez@okyry.gq",
+            "vehiculo": {
+                "marca": "Mazda",
+                "modelo": "3",
+                "placa": "ASD-789"
+            }
+        },
+        {
+            "id": 7,
+            "nombre": "Ricardo",
+            "apellido": "Navarro",
+            "usuario": "conductor7",
+            "password": "PWD123",
+            "email": "ricardo.navarro@okyry.gq",
+            "vehiculo": {
+                "marca": "Honda",
+                "modelo": "Civic",
+                "placa": "FGH-123"
+            }
+        },
+        {
+            "id": 8,
+            "nombre": "Claudia",
+            "apellido": "Guerrero",
+            "usuario": "conductor8",
+            "password": "PWD123",
+            "email": "claudia.guerrero@okyry.gq",
+            "vehiculo": {
+                "marca": "Ford",
+                "modelo": "Fiesta",
+                "placa": "JKL-456"
+            }
+        },
+        {
+            "id": 9,
+            "nombre": "Hugo",
+            "apellido": "Cortes",
+            "usuario": "conductor9",
+            "password": "PWD123",
+            "email": "hugo.cortes@okyry.gq",
+            "vehiculo": {
+                "marca": "Volkswagen",
+                "modelo": "Gol",
+                "placa": "ZXC-789"
+            }
+        },
+        {
+            "id": 10,
+            "nombre": "Adriana",
+            "apellido": "Medina",
+            "usuario": "conductor10",
+            "password": "PWD123",
+            "email": "adriana.medina@okyry.gq",
+            "vehiculo": {
+                "marca": "Renault",
+                "modelo": "Logan",
+                "placa": "VBN-123"
+            }
+        },
+        {
+            "id": 11,
+            "nombre": "Manuel",
+            "apellido": "Reyes",
+            "usuario": "conductor11",
+            "password": "PWD123",
+            "email": "manuel.reyes@okyry.gq",
+            "vehiculo": {
+                "marca": "Peugeot",
+                "modelo": "208",
+                "placa": "MQP-456"
+            }
+        },
+        {
+            "id": 12,
+            "nombre": "Veronica",
+            "apellido": "Cruz",
+            "usuario": "conductor12",
+            "password": "PWD123",
+            "email": "veronica.cruz@okyry.gq",
+            "vehiculo": {
+                "marca": "Suzuki",
+                "modelo": "Swift",
+                "placa": "LAK-789"
+            }
+        },
+        {
+            "id": 13,
+            "nombre": "Alejandro",
+            "apellido": "Mendez",
+            "usuario": "conductor13",
+            "password": "PWD123",
+            "email": "alejandro.mendez@okyry.gq",
+            "vehiculo": {
+                "marca": "Fiat",
+                "modelo": "Argo",
+                "placa": "JSH-123"
+            }
+        },
+        {
+            "id": 14,
+            "nombre": "Natalia",
+            "apellido": "Salas",
+            "usuario": "conductor14",
+            "password": "PWD123",
+            "email": "natalia.salas@okyry.gq",
+            "vehiculo": {
+                "marca": "Citroen",
+                "modelo": "C3",
+                "placa": "GTF-456"
+            }
+        },
+        {
+            "id": 15,
+            "nombre": "Javier",
+            "apellido": "Aguilar",
+            "usuario": "conductor15",
+            "password": "PWD123",
+            "email": "javier.aguilar@okyry.gq",
+            "vehiculo": {
+                "marca": "Jeep",
+                "modelo": "Renegade",
+                "placa": "KLO-789"
+            }
+        }
+    ],
+    "clientes": [
+        {
+            "id": 1,
+            "nombre": "Beatriz",
+            "apellido": "Molina",
+            "usuario": "cliente1",
+            "password": "PWD123",
+            "email": "beatriz.molina@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Beatriz"
+        },
+        {
+            "id": 2,
+            "nombre": "Oscar",
+            "apellido": "Delgado",
+            "usuario": "cliente2",
+            "password": "PWD123",
+            "email": "oscar.delgado@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Oscar"
+        },
+        {
+            "id": 3,
+            "nombre": "Daniela",
+            "apellido": "Rojas",
+            "usuario": "cliente3",
+            "password": "PWD123",
+            "email": "daniela.rojas@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Daniela"
+        },
+        {
+            "id": 4,
+            "nombre": "Victor",
+            "apellido": "Silva",
+            "usuario": "cliente4",
+            "password": "PWD123",
+            "email": "victor.silva@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Victor"
+        },
+        {
+            "id": 5,
+            "nombre": "Paula",
+            "apellido": "Vega",
+            "usuario": "cliente5",
+            "password": "PWD123",
+            "email": "paula.vega@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Paula"
+        },
+        {
+            "id": 6,
+            "nombre": "Eduardo",
+            "apellido": "Campos",
+            "usuario": "cliente6",
+            "password": "PWD123",
+            "email": "eduardo.campos@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Eduardo"
+        },
+        {
+            "id": 7,
+            "nombre": "Gloria",
+            "apellido": "Pena",
+            "usuario": "cliente7",
+            "password": "PWD123",
+            "email": "gloria.pena@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Gloria"
+        },
+        {
+            "id": 8,
+            "nombre": "Francisco",
+            "apellido": "Miranda",
+            "usuario": "cliente8",
+            "password": "PWD123",
+            "email": "francisco.miranda@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Francisco"
+        },
+        {
+            "id": 9,
+            "nombre": "Camila",
+            "apellido": "Cabrera",
+            "usuario": "cliente9",
+            "password": "PWD123",
+            "email": "camila.cabrera@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Camila"
+        },
+        {
+            "id": 10,
+            "nombre": "Martin",
+            "apellido": "Pacheco",
+            "usuario": "cliente10",
+            "password": "PWD123",
+            "email": "martin.pacheco@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Martin"
+        },
+        {
+            "id": 11,
+            "nombre": "Julia",
+            "apellido": "Rios",
+            "usuario": "cliente11",
+            "password": "PWD123",
+            "email": "julia.rios@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Julia"
+        },
+        {
+            "id": 12,
+            "nombre": "Daniel",
+            "apellido": "Espinoza",
+            "usuario": "cliente12",
+            "password": "PWD123",
+            "email": "daniel.espinoza@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Daniel"
+        },
+        {
+            "id": 13,
+            "nombre": "Andrea",
+            "apellido": "Acosta",
+            "usuario": "cliente13",
+            "password": "PWD123",
+            "email": "andrea.acosta@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Andrea"
+        },
+        {
+            "id": 14,
+            "nombre": "Esteban",
+            "apellido": "Valencia",
+            "usuario": "cliente14",
+            "password": "PWD123",
+            "email": "esteban.valencia@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Esteban"
+        },
+        {
+            "id": 15,
+            "nombre": "Marta",
+            "apellido": "Solis",
+            "usuario": "cliente15",
+            "password": "PWD123",
+            "email": "marta.solis@okyry.gq",
+            "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Marta"
+        }
+    ]
+}
