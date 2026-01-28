@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okyry VTC - Detalles del Viaje</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; }
+        .card-trip { background: #1e293b; border-radius: 24px; border: 1px solid #334155; }
+        .payment-opt { border: 2px solid #334155; transition: all 0.2s; background: #1e293b; cursor: pointer; }
+        .payment-opt.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-6 flex flex-col items-center">
+    <main class="w-full max-w-[430px]">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-2 border-emerald-500 p-0.5">
+                        <img id="userAvatar" alt="Avatar" class="w-full h-full rounded-full object-cover bg-slate-800" src=""/>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[12px] text-slate-400 font-medium leading-none mb-1">¡Hola, <span id="userName">Usuario</span>!</p>
+                    <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
+                </div>
+            </div>
+            <button class="text-slate-400"><span class="material-symbols-outlined">menu</span></button>
+        </header>
+
+        <!-- Stepper (5 Pasos) -->
+        <div class="relative mb-8 px-2">
+            <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -translate-y-1/2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-emerald-500 h-full transition-all duration-500" style="width: 55%"></div>
+            </div>
+            <div class="relative flex justify-between">
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step1-circle" class="w-4 h-4 rounded-full bg-emerald-500"></div>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase">1. Origen</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step2-circle" class="w-4 h-4 rounded-full bg-emerald-500"></div>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase">2. Destino</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step3-circle" class="w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></div>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase">3. Pago</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step4-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">4. Búsqueda</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step5-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">5. Ruta</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="mb-8">
+            <div class="card-trip p-6">
+                <h2 class="text-xl font-bold text-emerald-500 mb-6 uppercase tracking-wider">Detalles de tu viaje</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-start gap-4">
+                        <span class="text-slate-400 text-sm font-medium">De:</span>
+                        <span id="originText" class="text-white text-sm font-semibold text-right flex-1 break-words">...</span>
+                    </div>
+                    <div class="flex justify-between items-start gap-4">
+                        <span class="text-slate-400 text-sm font-medium">A:</span>
+                        <span id="destText" class="text-white text-sm font-semibold text-right flex-1 break-words">...</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400 text-sm font-medium">Distancia:</span>
+                        <span id="distText" class="text-white text-sm font-semibold">0 km</span>
+                    </div>
+                    <div class="pt-6 border-t border-slate-700 flex justify-between items-center">
+                        <span class="text-emerald-500 font-black uppercase tracking-widest text-sm">TOTAL A PAGAR:</span>
+                        <span id="totalText" class="text-2xl font-black text-emerald-400">0 Gs.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- El coche -->
+        <section class="mb-8 text-center">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">EL COCHE QUE TE ENVIAREMOS</p>
+            <div class="card-trip p-4 flex items-center gap-4">
+                <div class="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500">
+                    <span class="material-symbols-outlined text-4xl">directions_car</span>
+                </div>
+                <div class="text-left">
+                    <h4 class="font-bold text-white text-lg">Okyry Eléctrico</h4>
+                    <p class="text-[11px] text-slate-400 font-medium">4 plazas • 2 maletas</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Métodos de Pago -->
+        <section class="mb-10 text-center">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">SELECCIONA TU MÉTODO DE PAGO:</p>
+            <div class="space-y-3">
+                <div onclick="selectPayment('efectivo')" id="pay-efectivo" class="payment-opt w-full flex items-center justify-between p-4 rounded-2xl selected">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                            <span class="material-symbols-outlined text-2xl">payments</span>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm font-bold text-white">Efectivo</p>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">PAGO DIRECTO AL CONDUCTOR</p>
+                        </div>
+                    </div>
+                    <div id="check-efectivo" class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-slate-900 text-sm font-black">check</span>
+                    </div>
+                </div>
+                <div onclick="selectPayment('tarjeta')" id="pay-tarjeta" class="payment-opt w-full flex items-center justify-between p-4 rounded-2xl opacity-60">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined text-2xl">credit_card</span>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-sm font-bold text-white">Tarjeta</p>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">CONEXIÓN SEGURA</p>
+                        </div>
+                    </div>
+                    <div id="check-tarjeta" class="hidden w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-slate-900 text-sm font-black">check</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <button onclick="confirmTrip()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-black text-lg py-5 rounded-3xl transition-all active:scale-95 shadow-xl shadow-emerald-500/20 uppercase tracking-widest mb-8">
+            CONFIRMAR Y PEDIR RUTA
+        </button>
+    </main>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('okyry_cart') || '{}');
+        const user = JSON.parse(localStorage.getItem('okyry_user') || '{}');
+        let selectedMethod = 'efectivo';
+
+        // Cargar datos del usuario
+        if (user.nombre) {
+            document.getElementById('userName').innerText = user.nombre;
+            if (user.avatar) document.getElementById('userAvatar').src = user.avatar;
+        }
+
+        // Cargar detalles del viaje
+        document.getElementById('originText').innerText = cart.originName || 'Ubicación actual';
+        document.getElementById('destText').innerText = cart.destName || 'Destino no seleccionado';
+        document.getElementById('distText').innerText = (cart.dist || 0).toFixed(1) + ' km';
+        document.getElementById('totalText').innerText = (cart.price || 0).toLocaleString('es-PY') + ' Gs.';
+
+        function selectPayment(metodo) {
+            selectedMethod = metodo;
+            const ef = document.getElementById('pay-efectivo');
+            const tj = document.getElementById('pay-tarjeta');
+            const chEf = document.getElementById('check-efectivo');
+            const chTj = document.getElementById('check-tarjeta');
+
+            if (metodo === 'efectivo') {
+                ef.classList.add('selected');
+                ef.classList.remove('opacity-60');
+                tj.classList.remove('selected');
+                tj.classList.add('opacity-60');
+                chEf.classList.remove('hidden');
+                chTj.classList.add('hidden');
+            } else {
+                tj.classList.add('selected');
+                tj.classList.remove('opacity-60');
+                ef.classList.remove('selected');
+                ef.classList.add('opacity-60');
+                chTj.classList.remove('hidden');
+                chEf.classList.add('hidden');
+            }
+        }
+
+        function confirmTrip() {
+            cart.paymentMethod = selectedMethod;
+            localStorage.setItem('okyry_cart', JSON.stringify(cart));
+            
+            // Redirigir a la etapa 4 (Confirmación)
+            window.location.href = '/cliente/etapa4';
+        }
+    </script>
+</body>
+</html>

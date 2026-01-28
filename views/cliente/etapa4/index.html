@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okyry VTC - Estado del Viaje</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; }
+        .radar-pulse { animation: radar-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes radar-pulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .ping-slow { animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center overflow-hidden">
+    
+    <!-- PANTALLA: BUSCANDO (RADAR) -->
+    <div id="searching-ui" class="absolute inset-0 z-50 bg-slate-950 flex flex-col items-center justify-start py-12 px-6">
+        <header class="w-full max-w-[430px] flex flex-col mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full border-2 border-emerald-500 p-0.5">
+                        <img id="searchingAvatar" alt="Avatar" class="w-full h-full rounded-full object-cover bg-slate-800" src=""/>
+                    </div>
+                    <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
+                </div>
+            </div>
+
+            <!-- Stepper (5 Pasos) -->
+            <div class="relative px-2">
+                <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-800 -translate-y-1/2 rounded-full overflow-hidden">
+                    <div class="bg-emerald-500 h-full transition-all duration-500" style="width: 80%"></div>
+                </div>
+                <div class="relative flex justify-between">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div id="step4-circle" class="w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20 -mt-1"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 flex flex-col items-center justify-center">
+            <div class="relative w-64 h-64 flex items-center justify-center">
+                <div class="absolute w-full h-full border border-emerald-500/20 rounded-full ping-slow"></div>
+                <div class="absolute w-full h-full border border-emerald-500/10 rounded-full ping-slow" style="animation-delay: 1s"></div>
+                <div class="relative z-10 w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/30 radar-pulse">
+                    <span class="material-symbols-outlined text-5xl text-emerald-500" style="font-variation-settings: 'FILL' 1">directions_car</span>
+                </div>
+            </div>
+            <div class="mt-12 text-center max-w-[280px]">
+                <h2 id="searchTitle" class="text-2xl font-bold text-white mb-3">Verificando GPS...</h2>
+                <p id="searchText" class="text-sm text-slate-400 leading-relaxed">
+                    Buscando el coche más cercano disponible para tu ruta.
+                </p>
+            </div>
+        </div>
+
+        <button onclick="cancelSearch()" class="w-full max-w-[380px] bg-transparent border-2 border-slate-800 hover:border-slate-700 text-slate-500 font-bold py-5 rounded-3xl transition-all active:scale-95 text-lg uppercase tracking-widest mt-auto mb-10">
+            ANULAR
+        </button>
+    </div>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('okyry_cart') || '{}');
+        const user = JSON.parse(localStorage.getItem('okyry_user') || '{}');
+        let currentCarId = null;
+        let ws;
+
+        if (user.avatar) {
+            document.getElementById('searchingAvatar').src = user.avatar;
+        }
+
+        async function startMatching() {
+            try {
+                const clientId = localStorage.getItem('okyry_clientId');
+                const res = await fetch('/match-trip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        lat: cart.origin[0], 
+                        lng: cart.origin[1],
+                        clientId: clientId 
+                    })
+                });
+                
+                if (res.status === 404) {
+                    document.getElementById('searchTitle').innerText = "Sin coches cerca";
+                    document.getElementById('searchText').innerText = "Lo sentimos, no hay conductores disponibles. Reintentando...";
+                    setTimeout(startMatching, 5000);
+                    return;
+                }
+
+                const data = await res.json();
+                currentCarId = data.carId;
+                
+                document.getElementById('searchTitle').innerText = "Conductor asignado";
+                document.getElementById('searchText').innerText = "Esperando que el conductor confirme...";
+                
+                initRealtime();
+            } catch (e) {
+                console.error(e);
+                setTimeout(startMatching, 5000);
+            }
+        }
+
+        function initRealtime() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}`);
+            
+            ws.onmessage = (event) => {
+                const d = JSON.parse(event.data);
+                const items = d.f ? d.c : d.u;
+                const v = items.find(x => x[0] == currentCarId);
+                
+                if (v) {
+                    // Si el conductor acepta (st:3), vamos a la ETAPA 5
+                    if (v[3] === 3) {
+                        window.location.href = `/cliente/etapa5/index.html?id=${currentCarId}`;
+                    } else if (v[3] === 1 && currentCarId) {
+                        // Fue cancelado o rechazado antes de empezar
+                        currentCarId = null;
+                        ws.close();
+                        startMatching();
+                    }
+                }
+            };
+        }
+
+        async function cancelSearch() {
+            if (currentCarId) {
+                await fetch('/vehiculo/' + currentCarId, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ st: 1 })
+                });
+            }
+            window.location.href = '/cliente/etapa1';
+        }
+
+        startMatching();
+    </script>
+</body>
+</html>
+</body>
+</html>

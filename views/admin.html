@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Okyry VTC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        #adminMap { height: calc(100vh - 200px); border-radius: 1.5rem; }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col">
+    <header class="bg-slate-900/50 border-b border-slate-800 p-4 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-500 p-2 rounded-xl">
+                    <span class="material-symbols-outlined text-slate-900 font-bold">dashboard</span>
+                </div>
+                <div>
+                    <h1 class="font-black text-xl tracking-tight leading-none uppercase">OKYRY ADMIN</h1>
+                </div>
+            </div>
+            <nav class="flex bg-slate-950 p-1 rounded-2xl border border-slate-800">
+                <button onclick="showTab(event, 'estado')" class="tab-btn bg-emerald-500 text-slate-950 flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold">
+                    <span class="material-symbols-outlined text-lg">list_alt</span> LISTA
+                </button>
+                <button onclick="showTab(event, 'mapa')" class="tab-btn text-slate-400 hover:text-white flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold">
+                    <span class="material-symbols-outlined text-lg">map</span> MAPA
+                </button>
+            </nav>
+        </div>
+    </header>
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6">
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+            <div class="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Libres</p>
+                <h2 id="count1" class="text-3xl font-black text-emerald-500">0</h2>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Asignados</p>
+                <h2 id="count2" class="text-3xl font-black text-amber-500">0</h2>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">En Ruta</p>
+                <h2 id="count3" class="text-3xl font-black text-blue-500">0</h2>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">A Bordo</p>
+                <h2 id="count5" class="text-3xl font-black text-violet-500">0</h2>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Offline</p>
+                <h2 id="count4" class="text-3xl font-black text-slate-600">0</h2>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-5 rounded-3xl ring-2 ring-emerald-500/20">
+                <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Finalizados</p>
+                <h2 id="countF" class="text-3xl font-black text-white">0</h2>
+            </div>
+        </div>
+        <div id="tab-estado" class="tab-content active"><div id="adminList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div></div>
+        <div id="tab-mapa" class="tab-content"><div class="bg-slate-900/50 border border-slate-800 p-2 rounded-[2rem]"><div id="adminMap"></div></div></div>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const container = document.getElementById('adminList');
+        let ws, map, markers = {}, pMarkers = {}, fleetState = {}, pedState = {};
+        function showTab(e, tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-500', 'text-slate-950');
+                btn.classList.add('text-slate-400');
+            });
+            document.getElementById('tab-' + tab).classList.add('active');
+            if(e) { e.currentTarget.classList.add('bg-emerald-500', 'text-slate-950'); e.currentTarget.classList.remove('text-slate-400'); }
+            if(tab === 'mapa') setTimeout(initAdminMap, 100);
+        }
+        function initAdminMap() {
+            if(map) { map.invalidateSize(); return; }
+            map = L.map('adminMap', { zoomControl: false }).setView([3.75, 8.78], 14);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            updateAllMarkers();
+        }
+        function updateAllMarkers() { 
+            if(!map) return; 
+            Object.values(fleetState).forEach(c => updateMarker(c)); 
+            Object.values(pedState).forEach(p => updatePedestrian(p));
+        }
+        function updateMarker(c) {
+            if(!map) return;
+            const [id, lat, lng, st] = c;
+            const colors = { 1: '#10b981', 2: '#f59e0b', 3: '#3b82f6', 4: '#475569', 5: '#8b5cf6' };
+            
+            const html = `
+            <div class="relative w-10 h-10 rounded-2xl border-2 border-white flex items-center justify-center shadow-2xl transition-all" 
+                 style="background:${colors[st]};">
+                <span class="material-symbols-outlined text-slate-900 text-xl" style="font-variation-settings: 'FILL' 1">directions_car</span>
+                <div class="absolute -bottom-3 bg-slate-900 text-white text-[9px] px-1.5 py-0.5 rounded-md font-black border border-white/20 shadow-lg whitespace-nowrap">
+                    #${id}
+                </div>
+                ${st === 2 ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full ring-2 ring-white"></div>' : ''}
+            </div>`;
+            
+            const icon = L.divIcon({ className: 'custom-div-icon', html, iconSize: [40, 40], iconAnchor: [20, 20] });
+            if(!markers[id]) markers[id] = L.marker([lat, lng], { icon }).addTo(map);
+            else { markers[id].setLatLng([lat, lng]); markers[id].setIcon(icon); }
+        }
+        function updatePedestrian(p) {
+            if(!map) return;
+            const [id, lat, lng, name, carId] = p; // carId es el índice 3 opcional
+            
+            const html = `
+            <div class="relative w-10 h-10 rounded-2xl border-2 border-white flex items-center justify-center shadow-2xl bg-rose-500">
+                <span class="material-symbols-outlined text-white text-xl" style="font-variation-settings: 'FILL' 1">person</span>
+                <div class="absolute -bottom-3 bg-slate-900 text-white text-[9px] px-1.5 py-0.5 rounded-md font-black border border-white/20 shadow-lg whitespace-nowrap uppercase">
+                    ${name.split(' ')[0]} ${carId ? `<b class="text-rose-400 ml-1">#${carId}</b>` : ''}
+                </div>
+                ${carId ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-white"></div>' : ''}
+            </div>`;
+            
+            const icon = L.divIcon({ className: 'custom-div-icon', html, iconSize: [40, 40], iconAnchor: [20, 20] });
+            if(!pMarkers[id]) pMarkers[id] = L.marker([lat, lng], { icon }).addTo(map);
+            else { pMarkers[id].setLatLng([lat, lng]); pMarkers[id].setIcon(icon); }
+        }
+        function connect() {
+            ws = new WebSocket(`${window.location.protocol==='https:'?'wss:':'ws:'}//${window.location.host}`);
+            ws.onmessage = (event) => {
+                const d = JSON.parse(event.data);
+                if (d.fTrips !== undefined) document.getElementById('countF').innerText = d.fTrips;
+                const processP = (p) => {
+                    if (p[0] === 'DELETE') {
+                        if (pMarkers[p[1]]) { map.removeLayer(pMarkers[p[1]]); delete pMarkers[p[1]]; }
+                        delete pedState[p[1]];
+                    } else {
+                        pedState[p[0]] = p; updatePedestrian(p); 
+                    }
+                };
+                if (d.f) {
+                    d.c.forEach(c => { fleetState[c[0]] = c; renderCarCard(c); updateMarker(c); });
+                    if(d.p) d.p.forEach(processP);
+                } else {
+                    if (d.u) d.u.forEach(c => { fleetState[c[0]] = c; renderCarCard(c); updateMarker(c); });
+                    if (d.p) d.p.forEach(processP);
+                }
+                updateCounters();
+            };
+            ws.onclose = () => setTimeout(connect, 2000);
+        }
+        function renderCarCard(c) {
+            const [id, lat, lng, st] = c;
+            let el = document.getElementById('v' + id);
+            if(!el) { el = document.createElement('div'); el.id = 'v' + id; container.appendChild(el); }
+            const states = { 1: 'Libre', 2: 'Asignado', 3: 'En Ruta', 4: 'Offline', 5: 'A Bordo' };
+            const colors = { 1: 'text-emerald-500 border-emerald-500/20', 2: 'text-amber-500 border-amber-500/20', 3: 'text-blue-500 border-blue-500/20', 4: 'text-slate-500 border-slate-700 opacity-50', 5: 'text-violet-500 border-violet-500/20' };
+            el.className = `p-4 rounded-3xl border bg-slate-900/40 ${colors[st]}`;
+            el.style.order = id;
+            el.innerHTML = `<div class="flex justify-between items-center mb-2"><b class="text-xl italic">#${id}</b><span class="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg border inherit">${states[st]}</span></div><div class="text-[10px] font-mono text-slate-400">${lat.toFixed(4)}, ${lng.toFixed(4)}</div><div class="mt-4 flex gap-2"><a href="/conductor/${id}" target="_blank" class="flex-1 bg-white/5 py-2 rounded-xl text-[9px] font-bold text-center">PANEL</a><button onclick="map.setView([${lat}, ${lng}], 16); showTab(null, 'mapa')" class="flex-1 bg-white/5 py-2 rounded-xl text-[9px] font-bold text-center">VER</button></div>`;
+        }
+        function updateCounters() {
+            const counts = { 1:0, 2:0, 3:0, 4:0, 5:0 };
+            Object.values(fleetState).forEach(c => counts[c[3]]++);
+            for(let i=1; i<=5; i++) {
+                const el = document.getElementById('count' + i);
+                if (el) el.innerText = counts[i];
+            }
+        }
+        connect();
+    </script>
+</body>
+</html>

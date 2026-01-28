@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "email": "juan.perez@okyry.gq",
+    "telefono": "+240 222 555 111",
+    "password": "demo123",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Juan"
+  },
+  {
+    "id": 2,
+    "nombre": "María",
+    "apellido": "Nsang",
+    "email": "maria.nsang@okyry.gq",
+    "telefono": "+240 555 000 999",
+    "password": "demo456",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria"
+  },
+  {
+    "id": 3,
+    "nombre": "Roberto",
+    "apellido": "Oyono",
+    "email": "roberto.oyono@okyry.gq",
+    "telefono": "+240 333 444 777",
+    "password": "demo789",
+    "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Roberto"
+  }
+]

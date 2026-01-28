@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okyry VTC - Seguimiento en Vivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; }
+        #map { height: 100%; width: 100%; z-index: 0; }
+        .card-trip { background: #1e293b; border-radius: 24px; border: 1px solid #334155; }
+        .pulse-emerald { animation: pulse-emerald 2s infinite; }
+        @keyframes pulse-emerald {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center overflow-hidden">
+    
+    <!-- MAPA A PANTALLA COMPLETA -->
+    <div class="absolute inset-0 z-0">
+        <div id="map"></div>
+        <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-transparent pointer-events-none"></div>
+    </div>
+
+    <!-- UI LAYER -->
+    <main class="relative z-10 w-full max-w-[430px] mx-auto p-6 flex flex-col h-screen">
+        
+        <!-- Header con Stepper Etapa 5 -->
+        <header class="mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full border-2 border-emerald-500 p-0.5">
+                        <img id="userAvatar" alt="Avatar" class="w-full h-full rounded-full object-cover bg-slate-800" src=""/>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm tracking-tight uppercase">OKYRY VTC</h1>
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse">CONDUCTOR EN CAMINO</p>
+                    </div>
+                </div>
+                <div class="bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700">
+                    <span id="etaText" class="text-[10px] font-bold text-white uppercase tracking-tighter">Calculando...</span>
+                </div>
+            </div>
+
+            <!-- Stepper (5 Pasos) -->
+            <div class="relative px-2">
+                <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-800 -translate-y-1/2 rounded-full overflow-hidden">
+                    <div class="bg-emerald-500 h-full" style="width: 100%"></div>
+                </div>
+                <div class="relative flex justify-between">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    <div class="w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20 -mt-1"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- INFO DEL CONDUCTOR -->
+        <div class="mt-auto space-y-4 pb-8">
+            <div class="card-trip p-5 shadow-2xl backdrop-blur-xl bg-slate-900/95">
+                <!-- Datos del coche y conductor -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
+                                <span class="material-symbols-outlined text-4xl text-slate-500">person</span>
+                                <img id="driverAvatar" class="absolute inset-0 w-full h-full object-cover hidden" src="" />
+                            </div>
+                            <div class="absolute -bottom-1 -right-1 bg-emerald-500 w-5 h-5 rounded-full border-2 border-slate-900 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[10px] text-slate-900 font-black">verified</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 id="driverName" class="font-bold text-xl mb-0.5 text-white">...</h3>
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center text-amber-500">
+                                    <span class="material-symbols-outlined text-sm">star</span>
+                                    <span id="driverRating" class="text-xs font-bold ml-1">5.0</span>
+                                </div>
+                                <span class="text-slate-500 text-xs">•</span>
+                                <span class="text-slate-400 text-xs font-medium">Viajes: +500</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div id="carPlate" class="bg-emerald-500 text-slate-950 text-[11px] font-black px-2 py-1 rounded-lg mb-1 inline-block uppercase italic">...</div>
+                        <p id="carModel" class="text-[10px] text-slate-400 font-black uppercase leading-none tracking-tighter">...</p>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl flex items-center justify-center gap-2 text-white font-bold transition-all active:scale-95 shadow-lg">
+                        <span class="material-symbols-outlined text-emerald-400">chat</span>
+                        <span class="text-xs uppercase tracking-widest">Chat</span>
+                    </button>
+                    <button class="bg-slate-800 hover:bg-slate-700 py-4 rounded-2xl flex items-center justify-center gap-2 text-white font-bold transition-all active:scale-95 shadow-lg">
+                        <span class="material-symbols-outlined text-emerald-400">call</span>
+                        <span class="text-xs uppercase tracking-widest">Llamar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botón de Seguridad / Cancelar -->
+            <div class="flex gap-2">
+                <button onclick="window.location.href='/cliente/etapa1'" class="flex-1 bg-slate-900/80 border border-slate-800 text-slate-500 py-4 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:text-rose-500 transition-colors">
+                    CANCELAR VIAJE
+                </button>
+                <button class="w-14 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center">
+                    <span class="material-symbols-outlined">shield</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('okyry_cart') || '{}');
+        const user = JSON.parse(localStorage.getItem('okyry_user') || '{}');
+        const urlParams = new URLSearchParams(window.location.search);
+        let carId = urlParams.get('id');
+        let map, markerDriver, markerUser, ws;
+
+        if (user.avatar) document.getElementById('userAvatar').src = user.avatar;
+
+        function initMap() {
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([3.75, 8.78], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+            // Marcador del usuario (Peatón - igual que en Admin)
+            if (cart.origin) {
+                const userName = user.name || "Tú";
+                const userHtml = `
+                <div class="relative w-10 h-10 rounded-2xl border-2 border-white flex items-center justify-center shadow-2xl bg-rose-500">
+                    <span class="material-symbols-outlined text-white text-xl" style="font-variation-settings: 'FILL' 1">person</span>
+                    <div class="absolute -bottom-3 bg-slate-900 text-white text-[8px] px-1.2 py-0.5 rounded-md font-black border border-white/20 shadow-lg whitespace-nowrap uppercase tracking-tighter">
+                        ${userName.split(' ')[0]}
+                    </div>
+                </div>`;
+                const userIcon = L.divIcon({ className: 'custom-div-icon', html: userHtml, iconSize: [40, 40], iconAnchor: [20, 20] });
+                markerUser = L.marker(cart.origin, { icon: userIcon }).addTo(map);
+            }
+        }
+
+        function updateCarMarker(id, lat, lng, st) {
+            if(!map) return;
+            const colors = { 1: '#10b981', 2: '#f59e0b', 3: '#3b82f6', 4: '#475569', 5: '#8b5cf6' };
+            const html = `
+            <div class="relative w-10 h-10 rounded-2xl border-2 border-white flex items-center justify-center shadow-2xl transition-all" 
+                 style="background:${colors[st]};">
+                <span class="material-symbols-outlined text-slate-900 text-xl" style="font-variation-settings: 'FILL' 1">directions_car</span>
+                <div class="absolute -bottom-3 bg-slate-900 text-white text-[9px] px-1.5 py-0.5 rounded-md font-black border border-white/20 shadow-lg whitespace-nowrap">
+                    #${id}
+                </div>
+            </div>`;
+            const icon = L.divIcon({ className: 'custom-div-icon', html, iconSize: [40, 40], iconAnchor: [20, 20] });
+            
+            if(!markerDriver) {
+                markerDriver = L.marker([lat, lng], { icon }).addTo(map);
+            } else {
+                markerDriver.setLatLng([lat, lng]);
+                markerDriver.setIcon(icon);
+            }
+        }
+
+        function initRealtime() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}`);
+            
+            ws.onmessage = (event) => {
+                const d = JSON.parse(event.data);
+                const items = d.f ? d.c : d.u;
+                const v = items.find(x => x[0] == carId);
+                
+                if (v) {
+                    // Actualizar posición y estilo del marcador
+                    if (v[1] && v[2]) {
+                        updateCarMarker(v[0], v[1], v[2], v[3]);
+                        const newPos = [v[1], v[2]];
+                        if (!map.getBounds().contains(newPos)) {
+                            map.panTo(newPos);
+                        }
+                    }
+
+                    // Actualizar texto de estado e icono de usuario
+                    const statusSubtext = document.querySelector('header p');
+                    if (v[3] === 5) {
+                        if (markerUser) { map.removeLayer(markerUser); markerUser = null; }
+                        if (statusSubtext) {
+                            statusSubtext.innerText = "¡A BORDO! EN RUTA AL DESTINO";
+                            statusSubtext.className = "text-[10px] text-violet-400 font-bold uppercase tracking-widest animate-pulse";
+                        }
+                    } else if (v[3] === 3) {
+                        if (statusSubtext) {
+                            statusSubtext.innerText = "CONDUCTOR EN CAMINO";
+                            statusSubtext.className = "text-[10px] text-emerald-400 font-bold uppercase tracking-widest animate-pulse";
+                        }
+                    }
+
+                    // Si el conductor finaliza el viaje (v[3] === 1), volver al inicio
+                    if (v[3] === 1) {
+                        alert("¡Has llegado a tu destino! Gracias por viajar con Okyry.");
+                        window.location.href = '/cliente/etapa1';
+                    }
+                }
+            };
+        }
+
+        async function fetchDriverInfo() {
+            // Intentamos obtener info del conductor (en un entorno real vendría de una API)
+            // Por ahora simulamos con los datos que pasamos por Stage 4 o hardcodeamos basados en el ID
+            const drivers = {
+                1: { nombre: "Juan Pérez", rating: 4.8, vehicle: "Toyota Prius", plate: "MP-456-X" },
+                2: { nombre: "María García", rating: 4.9, vehicle: "Hyundai Ioniq", plate: "MP-122-A" },
+                3: { nombre: "Carlos Ruiz", rating: 4.7, vehicle: "Kia Niro", plate: "MP-889-B" },
+                4: { nombre: "Ana López", rating: 5.0, vehicle: "Tesla Model 3", plate: "OKY-001-Z" }
+            };
+
+            const info = drivers[carId] || { nombre: "Conductor " + carId, rating: 4.5, vehicle: "VTC Estándar", plate: "SN-00" + carId };
+            
+            document.getElementById('driverName').innerText = info.nombre;
+            document.getElementById('driverRating').innerText = info.rating;
+            document.getElementById('carPlate').innerText = info.plate;
+            document.getElementById('carModel').innerText = info.vehicle;
+            document.getElementById('etaText').innerText = "Aprox. 4 min";
+        }
+
+        initMap();
+        initRealtime();
+        fetchDriverInfo();
+    </script>
+</body>
+</html>

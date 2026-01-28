@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Okyry VTC - Ruta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#10b981",
+                        "background-dark": "#0f172a",
+                        "surface-dark": "#1e293b",
+                        "input-dark": "#0f172a",
+                    }
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 300px; border-radius: 20px; margin-top: 1rem; border: 1px solid #334155; }
+        .custom-marker-a { background: #10b981; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
+        .custom-marker-b { background: #f43f5e; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(244,63,94,0.5); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen flex flex-col items-center">
+
+    <main class="w-full max-w-[430px] px-6 flex flex-col flex-1 pt-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-2 border-primary p-0.5">
+                        <img id="userAvatar" alt="Avatar" class="w-full h-full rounded-full object-cover bg-slate-800" src=""/>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[12px] text-slate-400 font-medium leading-none mb-1">¡Hola, <span id="userName">Usuario</span>!</p>
+                    <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
+                </div>
+            </div>
+            <button onclick="localStorage.removeItem('okyry_user'); location.href='/'" class="text-slate-400">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </header>
+
+        <!-- Stepper (5 Pasos) -->
+        <div class="relative mb-8 px-2">
+            <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -translate-y-1/2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-primary h-full transition-all duration-500" style="width: 10%"></div>
+            </div>
+            <div class="relative flex justify-between">
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step1-circle" class="w-4 h-4 rounded-full bg-primary ring-4 ring-emerald-500/20"></div>
+                    <span class="text-[9px] font-bold text-primary uppercase">1. Origen</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step2-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">2. Destino</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step3-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">3. Pago</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step4-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">4. Búsqueda</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step5-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">5. Ruta</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Card -->
+        <div class="bg-surface-dark/50 border border-slate-800/50 rounded-3xl p-6 shadow-2xl mb-4">
+            <h2 id="mainTitle" class="text-xl font-bold mb-6 text-center text-white">¿Dónde te buscamos?</h2>
+            
+            <div class="space-y-4">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-rose-500 text-xl">location_on</span>
+                    <input id="origin" class="block w-full pl-12 pr-4 py-4 bg-input-dark border-transparent focus:border-primary focus:ring-1 focus:ring-primary rounded-2xl text-white placeholder-slate-500 transition-all" placeholder="Punto de salida (Ej: Aeropuerto)..." type="text" autocomplete="off"/>
+                    <div id="originResults" class="absolute w-full mt-2 bg-surface-dark border border-slate-700 rounded-xl overflow-hidden z-50 hidden"></div>
+                </div>
+
+                <div id="buttonsSelection" class="grid grid-cols-2 gap-3">
+                    <button onclick="useGPS()" class="flex items-center justify-center gap-2 bg-primary hover:bg-emerald-600 text-white font-semibold py-4 rounded-2xl transition-all active:scale-95">
+                        <span class="material-symbols-outlined text-lg">my_location</span>
+                        <span class="text-sm">GPS</span>
+                    </button>
+                    <button id="mapBtn" onclick="initMap()" class="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-4 rounded-2xl transition-all active:scale-95">
+                        <span class="material-symbols-outlined text-lg">map</span>
+                        <span class="text-sm">Mapa</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="map" class="hidden"></div>
+        <div id="routeInfo" class="mt-4 bg-emerald-900/20 border border-emerald-500/30 p-4 rounded-2xl hidden shadow-lg shadow-emerald-500/5"></div>
+
+        <div class="mt-auto pb-8 flex flex-col items-center">
+            <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-medium">Okyry VTC Premium</p>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ... (Tu lógica JS actual se mantiene, pero aquí ajustamos los elementos UI)
+        let map, markerA, posA;
+
+        function initMap() {
+            const mapEl = document.getElementById('map');
+            if (mapEl.classList.contains('hidden')) mapEl.classList.remove('hidden');
+            if (map) return;
+            map = L.map('map').setView([3.75, 8.78], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+            map.on('click', e => selectPoint(e.latlng.lat, e.latlng.lng, 'A'));
+        }
+
+        async function useGPS() {
+            initMap();
+            navigator.geolocation.getCurrentPosition(pos => {
+                selectPoint(pos.coords.latitude, pos.coords.longitude, 'A');
+            }, err => alert("Activa el GPS"));
+        }
+
+        function selectPoint(lat, lon, type) {
+            const pos = [lat, lon];
+            if (type === 'A') {
+                posA = pos;
+                if (markerA) markerA.remove();
+                markerA = L.marker(pos, {icon: L.divIcon({className: 'custom-marker-a', iconSize: [16, 16]})}).addTo(map);
+                document.getElementById('origin').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                showConfirmUI('A');
+            }
+            map.setView(pos, 15);
+        }
+
+        function showConfirmUI(type) {
+            const info = document.getElementById('routeInfo');
+            info.classList.remove('hidden');
+            info.innerHTML = `
+                <p class="text-sm font-semibold text-emerald-400 mb-3 text-center">Confirmar punto de recogida</p>
+                <div class="flex gap-2">
+                    <button onclick="confirmStep()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold text-sm">ACEPTAR</button>
+                    <button onclick="location.reload()" class="bg-slate-800 text-slate-300 px-4 rounded-xl text-sm">CANCELAR</button>
+                </div>
+            `;
+        }
+
+        async function confirmStep() {
+            let user = JSON.parse(localStorage.getItem('okyry_user'));
+            
+            if (!user || user.nombre === 'Invitado') {
+                const name = prompt("¿Cuál es tu nombre?", "Cliente");
+                user = { nombre: name || "Cliente", avatar: "" };
+                localStorage.setItem('okyry_user', JSON.stringify(user));
+            }
+
+            const cart = {
+                origin: posA,
+                originName: document.getElementById('origin').value
+            };
+            localStorage.setItem('okyry_cart', JSON.stringify(cart));
+            
+            // Notificar al admin sobre la posición del peatón
+            const clientId = user.nombre.replace(/\s/g, '_') + '_' + Date.now();
+            localStorage.setItem('okyry_clientId', clientId);
+
+            try {
+                await fetch('/client-pos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: clientId,
+                        lat: posA[0],
+                        lng: posA[1],
+                        name: user.nombre
+                    })
+                });
+            } catch(e) { console.error("Error notified admin", e); }
+
+            window.location.href = '/cliente/etapa2';
+        }
+
+        // Cargar datos de usuario
+        const okyryUser = JSON.parse(localStorage.getItem('okyry_user'));
+        if (okyryUser) {
+            document.getElementById('userName').innerText = okyryUser.nombre;
+            document.getElementById('userAvatar').src = okyryUser.avatar;
+        }
+    </script>
+</body>
+</html>

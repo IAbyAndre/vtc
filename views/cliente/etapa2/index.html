@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Okyry VTC - Destino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#10b981",
+                        "background-dark": "#0f172a",
+                        "surface-dark": "#1e293b",
+                        "input-dark": "#0f172a",
+                    }
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        body { font-family: 'Inter', sans-serif; }
+        #map { height: 300px; border-radius: 20px; margin-top: 1rem; border: 1px solid #334155; }
+        .custom-marker-a { background: #10b981; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
+        .custom-marker-b { background: #f43f5e; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(244,63,94,0.5); }
+    </style>
+</head>
+<body class="bg-background-dark text-slate-100 min-h-screen flex flex-col items-center">
+
+    <main class="w-full max-w-[430px] px-6 flex flex-col flex-1 pt-8">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-2 border-primary p-0.5">
+                        <img id="userAvatar" alt="Avatar" class="w-full h-full rounded-full object-cover bg-slate-800" src=""/>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-[12px] text-slate-400 font-medium leading-none mb-1">¡Hola, <span id="userName">Usuario</span>!</p>
+                    <h1 class="font-bold text-lg tracking-tight leading-none uppercase">OKYRY VTC</h1>
+                </div>
+            </div>
+            <button onclick="localStorage.removeItem('okyry_user'); location.href='/'" class="text-slate-400">
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </header>
+
+        <!-- Stepper (5 Pasos) -->
+        <div class="relative mb-8 px-2">
+            <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -translate-y-1/2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-primary h-full transition-all duration-500" style="width: 30%"></div>
+            </div>
+            <div class="relative flex justify-between">
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step1-circle" class="w-4 h-4 rounded-full bg-emerald-500"></div>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase">1. Origen</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step2-circle" class="w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></div>
+                    <span class="text-[9px] font-bold text-emerald-500 uppercase">2. Destino</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step3-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">3. Pago</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step4-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">4. Búsqueda</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <div id="step5-circle" class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-slate-600 mt-1"></div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">5. Ruta</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Card -->
+        <div class="bg-surface-dark/50 border border-slate-800/50 rounded-3xl p-6 shadow-2xl mb-4">
+            <h2 id="mainTitle" class="text-xl font-bold mb-6 text-center text-white">¿A dónde vamos?</h2>
+            
+            <div class="space-y-4">
+                <!-- Punto de Recogida (Referencia) -->
+                <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50 flex items-center gap-3">
+                    <span class="material-symbols-outlined text-emerald-500 text-lg">near_me</span>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Recogida en</p>
+                        <p id="originLabel" class="text-white text-xs font-semibold truncate italic text-slate-400 font-medium">Cargando ubicación...</p>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary text-xl">location_on</span>
+                    <input id="dest" class="block w-full pl-12 pr-4 py-4 bg-input-dark border-2 border-emerald-500/20 focus:border-primary focus:ring-0 rounded-2xl text-white placeholder-slate-500 transition-all font-medium" placeholder="Escribe tu destino..." type="text" autocomplete="off"/>
+                    <div id="destResults" class="absolute w-full mt-2 bg-surface-dark border border-slate-700 rounded-xl overflow-hidden z-50 hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map" class="w-full grow mb-4"></div>
+        <div id="routeInfo" class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-[382px] z-[2000] hidden"></div>
+
+        <div class="mt-auto pb-8 flex flex-col items-center">
+            <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-medium">Okyry VTC Premium</p>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map, markerA, markerB, polyline, posA, posB;
+        const cart = JSON.parse(localStorage.getItem('okyry_cart') || '{}');
+        posA = cart.origin;
+        
+        // Mostrar origen en el label
+        if (cart.originName) {
+            document.getElementById('originLabel').innerText = cart.originName;
+            document.getElementById('originLabel').classList.remove('italic', 'text-slate-400');
+        }
+
+        function initMap() {
+            const mapEl = document.getElementById('map');
+            if (map) return;
+            
+            map = L.map('map', { zoomControl: false }).setView(posA || [-25.2822, -57.6351], 15);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
+                attribution: '© OSM' 
+            }).addTo(map);
+            
+            if (posA) {
+                markerA = L.marker(posA, {
+                    icon: L.divIcon({className: 'custom-marker-list custom-marker-a', iconSize: [16, 16]})
+                }).addTo(map);
+            }
+            
+            map.on('click', e => selectPoint(e.latlng.lat, e.latlng.lng));
+        }
+
+        function selectPoint(lat, lon) {
+            const pos = [lat, lon];
+            posB = pos;
+            if (markerB) markerB.remove();
+            markerB = L.marker(pos, {
+                icon: L.divIcon({className: 'custom-marker-list custom-marker-b', iconSize: [16, 16]})
+            }).addTo(map);
+            
+            document.getElementById('dest').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+            showConfirmUI();
+        }
+
+        function showConfirmUI() {
+            const info = document.getElementById('routeInfo');
+            if (polyline) polyline.remove();
+            
+            polyline = L.polyline([posA, posB], {
+                color: '#10b981', 
+                weight: 4, 
+                dashArray: '8, 8',
+                opacity: 0.6
+            }).addTo(map);
+            
+            map.fitBounds(polyline.getBounds(), {padding: [100, 100]});
+
+            const meters = map.distance(posA, posB);
+            const dist = (meters / 1000).toFixed(2);
+            const time = Math.ceil((meters / 1000) * 3); // Aprox 3 min por km
+            const price = Math.max(5000, Math.round((meters / 1000) * 3500)); // Precio base 5k + 3.5k/km
+
+            info.classList.remove('hidden');
+            info.innerHTML = `
+                <div class="bg-slate-900/95 backdrop-blur-xl border border-emerald-500/30 p-6 rounded-[32px] shadow-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-none mb-1">Tiempo estimado</p>
+                            <p class="text-3xl font-black text-emerald-400 leading-none">${time} min</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-none mb-1">Distancia</p>
+                            <p class="text-xl font-bold text-white leading-none">${dist} km</p>
+                        </div>
+                    </div>
+                    <button onclick="confirmStep(${dist}, ${price})" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-900 py-5 rounded-2xl font-black text-lg shadow-xl shadow-emerald-500/20 active:scale-95 transition-all uppercase tracking-wider">
+                        CONFIRMAR DESTINO
+                    </button>
+                </div>
+            `;
+        }
+
+        function confirmStep(dist, price) {
+            cart.dist = dist;
+            cart.price = price;
+            cart.dest = posB;
+            cart.destName = document.getElementById('dest').value;
+            localStorage.setItem('okyry_cart', JSON.stringify(cart));
+            window.location.href = '/cliente/etapa3';
+        }
+
+        // Cargar datos de usuario
+        const okyryUser = JSON.parse(localStorage.getItem('okyry_user'));
+        if (okyryUser) {
+            document.getElementById('userName').innerText = okyryUser.nombre;
+            document.getElementById('userAvatar').src = okyryUser.avatar;
+        }
+
+        // Auto-iniciar mapa si ya tenemos origen
+        if (posA) initMap();
+    </script>
+</body>
+</html>
